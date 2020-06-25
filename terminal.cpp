@@ -67,7 +67,7 @@ bool terminal::post_image(std::string json) {
 }
 
 void terminal::initialize_mqtt_client() {
-    connOpts.set_keep_alive_interval(20);
+    connOpts.set_keep_alive_interval(1200);
     connOpts.set_mqtt_version(MQTTVERSION_5);
     connOpts.set_clean_start(true);
     connOpts.set_user_name("DEVICE_"+this->user_id);
