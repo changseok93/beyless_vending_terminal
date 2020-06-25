@@ -14,17 +14,12 @@
 
 #include "logger.h"
 #define DAEMON_PROCESS_DOORLOCK_H
-
 /*
  * class doorLock manipulates door lock states and provide doorlock access APIs
- */
-
-/*
  * enum lock_status
  * follows linux file auth system
  * lock|door|triger = 2^2|2^1|2^0 = 4|2|1
  */
-
 enum lock_status{
     UNLOCK_CLOSE = 0,
     TRY_UNLOCK,
@@ -57,23 +52,26 @@ protected:
     logger log = logger("DOOR LOCK");
 
 public:
+    // deprecated initializer
     doorLock();
+    // class initializer
     doorLock(int lock, int door, int trigger);
+    // class destroyer
     ~doorLock();
 
+    // reconf all pin mapping, deprecated
     void reset_pins();
-
+    // refresh all pin states
     void get_states();
+    // unlock
     bool door_open();
+    // lock
     bool door_close();
-
+    // wait until door open
     bool wait_open();
+    // wait until door close
     bool wait_close();
-
+    // check doorLock state in WAIT(LOCK CLOSE)
     bool is_ready();
-
-
 };
-
-
 #endif //DAEMON_PROCESS_DOORLOCK_H

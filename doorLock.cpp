@@ -4,11 +4,13 @@
 
 #include "doorLock.h"
 
-
+//default initializer (deprecated)
 doorLock::doorLock(){
-    std::cout << "default initiailizer called, this initializer did nothing." << std::endl;
+    log.print_log("default initiailizer called, this initializer used for debugging. please use another one!");
+
 }
 
+//door lock class initializer, gets GPIO pin number of lock, door sensors and door lock trigger
 doorLock::doorLock(int lock, int door, int trigger){
     log.print_log("door lock initialize ... ");
     this->door_num = door;
@@ -70,6 +72,7 @@ doorLock::doorLock(int lock, int door, int trigger){
 
 }
 
+// doorLock class destroyer, release all pin FDs...
 doorLock::~doorLock(){
     log.print_log("release resources ... ");
     this->door.close();
@@ -78,6 +81,7 @@ doorLock::~doorLock(){
     log.print_log("DONE");
 }
 
+// reconfigure all pin mappings, for debug only, deprecated
 void doorLock::reset_pins(){
     try{
         this->door.close();
@@ -138,6 +142,7 @@ void doorLock::reset_pins(){
     this->trigger.seekg(0);
 }
 
+// refresh all pin states and save it
 void doorLock::get_states(){
     this->door >> this->door_value;
     this->lock >> this->lock_value;
@@ -151,6 +156,8 @@ void doorLock::get_states(){
 
     return ;
 }
+
+// unlock doorLock trigger
 bool doorLock::door_open(){
     try{
         log.print_log("UNLOCK");
@@ -164,6 +171,7 @@ bool doorLock::door_open(){
     return true;
 }
 
+// lock doorLock trigger
 bool doorLock::door_close(){
     try{
         log.print_log("LOCK");
@@ -177,6 +185,7 @@ bool doorLock::door_close(){
     return true;
 }
 
+// wait until doorLock state is in UNLOCK and OPEN
 bool doorLock::wait_open(){
     get_states();
     while (this->status != UNLOCK_OPEN){
@@ -187,6 +196,7 @@ bool doorLock::wait_open(){
     return true;
 }
 
+// wait until doorLock state is in UNLOCK and CLOSE
 bool doorLock::wait_close() {
     get_states();
     while (this->status != UNLOCK_CLOSE){
@@ -197,7 +207,7 @@ bool doorLock::wait_close() {
     return true;
 }
 
-
+// wait until doorLock state is in READY STATE (LOCK CLOSE)
 bool doorLock::is_ready() {
     get_states();
     if (this->status == WAIT)
