@@ -109,6 +109,7 @@ void terminal::initialize_mqtt_client() {
                 }
                 else if (type == "collect_dataset"){
                     std::string res_form;
+                    int64_t image_id;
                     if (is_ready()){
                         door_open();
                         wait_open();
@@ -119,9 +120,9 @@ void terminal::initialize_mqtt_client() {
                         std::vector<cv::Mat>::iterator iter;
 
                         for(iter = images.begin(); iter != images.end(); iter++){
-                            database_upload(*iter, d["env_id"].GetString(), d["image_type"].GetString());
+                            image_id = database_upload(*iter, d["env_id"].GetString(), d["image_type"].GetString());
                         }
-                        res_form = create_response_form(json, "ack", "", "", true);
+                        res_form = create_response_form(json, "ack", "", std::to_string(image_id), true);
                         mqtt_publish(res_form);
                     } else {
                         res_form = create_response_form(json, "ack", "", "", false);
@@ -190,6 +191,9 @@ void terminal::initialize_MySQL_database() {
     }
     log.print_log("mysql initialize success.");
 
+    bool reconnect = 1;
+    mysql_options(conn, MYSQL_OPT_RECONNECT, &reconnect);
+
     if(!mysql_real_connect(conn, server, user, password, NULL, 3306, NULL, 0)){
         log.print_log("connect error.");
         exit(1);
@@ -237,7 +241,7 @@ std::string terminal::create_response_form(std::string json, char* type, std::st
                              "ret_code", "server_node_id", "timestamp"});
     }
     else if (type == "ack"){
-        json_members.assign({"msg_group_type", "type", "ret_code"});
+        json_members.assign({"msg", "msg_group_type", "type", "ret_code"});
     }
     else
         return NULL;
@@ -257,7 +261,7 @@ std::string terminal::create_response_form(std::string json, char* type, std::st
             } else if (*iter == "msg") {
                 rapidjson::Value str_value;
                 str_value.SetString(msg.c_str(), msg.length());
-                return_form.AddMember("stage", str_value, allocator);
+                return_form.AddMember("msg", str_value, allocator);
             } else if (*iter == "ret_code") {
                     if (result)
                         return_form.AddMember("ret_code", "0000", allocator);
@@ -274,7 +278,7 @@ std::string terminal::create_response_form(std::string json, char* type, std::st
     return buffer.GetString();
 }
 
-bool terminal::database_upload(cv::Mat iter, std::string env_id, std::string type){
+int64_t terminal::database_upload(cv::Mat iter, std::string env_id, std::string type){
     char* log_string = new char [1000];
 
     //jpeg compression parameters
@@ -309,9 +313,10 @@ bool terminal::database_upload(cv::Mat iter, std::string env_id, std::string typ
                 mysql_error(conn));
         log.print_log(log_string);
     }
+
     log.print_log("save image in mysql_server success");
     delete query;
 //    delete data;
     // -----------------------------------------------------------------------------------------------
-    return true;
+    return mysql_insert_id(conn);
 }

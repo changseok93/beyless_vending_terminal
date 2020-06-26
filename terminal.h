@@ -66,7 +66,7 @@ public:
 
     std::string create_response_form(std::string json, char* type, std::string stage, std::string msg, bool result);
 
-    bool database_upload(cv::Mat iter, std::string env_id, std::string type);
+    int64_t database_upload(cv::Mat iter, std::string env_id, std::string type);
 
 };
 
