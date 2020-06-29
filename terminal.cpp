@@ -293,9 +293,11 @@ int64_t terminal::database_upload(cv::Mat iter, std::string env_id, std::string 
     int length = buff.size();
     sprintf(log_string, "JPEG encoding, size : %d", length);
     log.print_log(log_string);
-    log_string = {0};
+    delete log_string;
+    
     // -----------------------------------------------------------------------------------------------
     char *query,*end;
+    
     query = new char [2*length + 1000];
     end = stpcpy(query,"INSERT INTO Image (env_id, data, type, check_num) VALUES('");
     end = stpcpy(end, env_id.c_str());
@@ -306,15 +308,18 @@ int64_t terminal::database_upload(cv::Mat iter, std::string env_id, std::string 
     end = stpcpy(end, "','");
     end = stpcpy(end, "1')");
 
-
+    log_string = new char [1000];
     if (mysql_real_query(conn,query,(unsigned int) (end - query)))
     {
-        sprintf(log_string, "Failed to insert row, Error: %s",
-                mysql_error(conn));
+        std::string error = mysql_error(conn);
+        sprintf(log_string, "Failed to insert row, Error: %s", error.c_str());
         log.print_log(log_string);
+        delete log_string;
+
+    } else {
+        log.print_log("save image in mysql_server success");
     }
 
-    log.print_log("save image in mysql_server success");
     delete query;
 //    delete data;
     // -----------------------------------------------------------------------------------------------
