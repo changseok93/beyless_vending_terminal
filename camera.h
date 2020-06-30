@@ -15,20 +15,20 @@
 
 class camera {
 private:
-    std::vector <cv::VideoCapture> caps;
-    std::vector <int> video_device;
-    std::vector <cv::Mat> images;
-    cv::Mat image;
+    std::vector <cv::VideoCapture> caps; // list of activated video capture devices
+    std::vector <int> video_device; //list of video capture device index
+    std::vector <cv::Mat> images; // list of latest images from camera
+    cv::Mat image; // temper single image
 
-    logger log = logger("CAMERA");
+    logger log = logger("CAMERA"); //logger object for print log
 public:
-    camera();
-    camera(int* camera_index, int num);
+    camera(); //defualt initializer, deprecated
+    camera(int* camera_index, int num); // initializer with number of camera device and it's index. registrate all camera devices
 
-    bool grab_frame();
-    std::vector<cv::Mat> get_frame();
+    bool grab_frame(); // grab image from camera devices
+    std::vector<cv::Mat> get_frame(); // return latest taken images from camera
 
-    bool save_frame(char* PATH);
+    bool save_frame(char* PATH); //save image in PATH
 };
 
 

@@ -31,7 +31,7 @@ bool camera::grab_frame() {
     // flush images container
     images.clear();
 
-    // grab images from predefined capture device
+    // grab images from predefined capture devices
     try{
         std::vector<cv::VideoCapture>::iterator iter;
         for(iter = caps.begin(); iter != caps.end(); iter++){
@@ -52,11 +52,12 @@ bool camera::grab_frame() {
     return true;
 }
 
+// return images
 std::vector<cv::Mat> camera::get_frame(){
     return images;
 }
 
-
+// save images in _PATH/image#.jpeg
 bool camera::save_frame(char* _PATH){
     int image_counter = 0;
     std::vector<cv::Mat>::iterator iter;

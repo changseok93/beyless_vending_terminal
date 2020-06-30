@@ -1,5 +1,6 @@
 #include "terminal.h"
 
+// terminal class initializer which initialize all inherited classes
 terminal::terminal(std::string _SERVER_ADDRESS, int _QOS,
         std::string _user_id, std::string _topic, int* camera_index,
         int num, int lock, int door, int trigger):
@@ -15,6 +16,8 @@ terminal::terminal(std::string _SERVER_ADDRESS, int _QOS,
     this->user_id = _user_id;
     this->topic = _topic;
 }
+
+// send taken pictures to remote server using http protocol
 size_t noop_cb(void *ptr, size_t size, size_t nmemb, void *data) {
     return size * nmemb;
 }
@@ -66,6 +69,7 @@ bool terminal::post_image(std::string json) {
         return false;
 }
 
+// initialize MQTT client service, register call back function with lambda function (will be modified soon)
 void terminal::initialize_mqtt_client() {
     connOpts.set_keep_alive_interval(1200);
     connOpts.set_mqtt_version(MQTTVERSION_5);
@@ -184,6 +188,7 @@ void terminal::initialize_mqtt_client() {
     }
 }
 
+// initialize MYSQL database (require auto reconnect )
 void terminal::initialize_MySQL_database() {
     if( !(conn = mysql_init((MYSQL*)NULL))){
         log.print_log("init fail");
@@ -209,14 +214,14 @@ void terminal::initialize_MySQL_database() {
     log.print_log("select db success");
 }
 
-
+// publish stirng type payload using pub1 object
 void terminal::mqtt_publish(std::string payload) {
     pub1.publish(payload);
 }
 
 
 
-
+// create response json form
 std::string terminal::create_response_form(std::string json, char* type, std::string stage, std::string msg, bool result){
     rapidjson::Document return_form;
     return_form.SetObject();
@@ -278,6 +283,7 @@ std::string terminal::create_response_form(std::string json, char* type, std::st
     return buffer.GetString();
 }
 
+// upload taken pictures to MYSQL database
 int64_t terminal::database_upload(cv::Mat iter, std::string env_id, std::string type){
     char* log_string = new char [1000];
 
