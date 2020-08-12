@@ -41,7 +41,12 @@ bool camera::grab_frame() {
             // for stable output quality, get 5 frames and use last one
             for(int i = 0; i<5; i++)
                 *iter >> image;
-            images.push_back(image);
+            cv::Rect bounds(0,0,image.cols,image.rows);
+            cv::Rect r(330,0,1290,1080); // partly outside
+            cv::Mat roi = image( r & bounds ); // cropped to fit image
+
+            images.push_back(roi);
+            roi.release();
         }
     } catch (cv::Exception& e) {
         log.print_log(("EXCEPTION CAUGHT : " + std::string(e.what())));

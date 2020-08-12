@@ -8,7 +8,7 @@ terminal::terminal(std::string _SERVER_ADDRESS, int _QOS,
         cli(SERVER_ADDRESS, "DEVICE_"+_user_id),
         sub1(cli, _topic, _QOS),
         sub2(cli, "DEVICE_"+_topic, _QOS),
-        pub1(cli, "device_operation_vending_web", _QOS),
+        pub1(cli, "device_operation_vending-web", _QOS),
         camera(camera_index, num),
         doorLock(lock, door, trigger)
 {
@@ -154,10 +154,11 @@ void terminal::initialize_mqtt_client() {
                         wait_close();
 
                         if (door_close())
-                            res_form = create_response_form(json, "door_open_close", "open_close", "open_close",true);
+                            res_form = create_response_form(json, "door_open_close", "close_door", "close_door",true);
                         else
-                            res_form = create_response_form(json, "door_open_close", "open_close", "open_close",false);
+                            res_form = create_response_form(json, "door_open_close", "close_door", "close_door",false);
                         mqtt_publish(res_form);
+
                         grab_frame();
                         save_frame("/home/changseok/Desktop/");
                         if(post_image(json))
@@ -189,7 +190,7 @@ void terminal::initialize_mqtt_client() {
 }
 
 // initialize MYSQL database (require auto reconnect )
-void terminal::initialize_MySQL_database() {
+void terminal::initialize_MySQL_connector() {
     if( !(conn = mysql_init((MYSQL*)NULL))){
         log.print_log("init fail");
         exit(1);
@@ -276,6 +277,14 @@ std::string terminal::create_response_form(std::string json, char* type, std::st
         }
     }
 
+    if (msg == "open_door"){
+        return_form["msg_group_type"] = "ack";
+        return_form["type"] = "open_door_resp";
+    } else if (msg == "close_door") {
+        return_form["msg_group_type"] = "notify";
+        return_form["type"] = "close_door";
+    }
+
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     return_form.Accept(writer);
@@ -305,7 +314,7 @@ int64_t terminal::database_upload(cv::Mat iter, std::string env_id, std::string 
     char *query,*end;
     
     query = new char [2*length + 1000];
-    end = stpcpy(query,"INSERT INTO Image (env_id, data, type, check_num) VALUES('");
+    end = stpcpy(query,"INSERT INTO Image (env_id, img, type, check_num) VALUES('");
     end = stpcpy(end, env_id.c_str());
     end = stpcpy(end, "','");
     end += mysql_real_escape_string(conn,end,data,length);

@@ -67,7 +67,7 @@ public:
     // initialize MQTT client, all publisher & subscriber
     void initialize_mqtt_client();
     //initialize MYSQL database
-    void initialize_MySQL_database();
+    void initialize_MySQL_connector();
 
     // mqsql publish given string type payload (will be modified)
     void mqtt_publish(std::string payload);

@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
     //create terminal object and initialize mqtt, MySQl
     terminal T(broker_ip, 0, device_id, device_id, cam_list, cam_count, LOCK_SENSOR, DOOR_SENSOR, LOCK_TRIGGER);
     T.initialize_mqtt_client();
-    T.initialize_MySQL_database();
+    T.initialize_MySQL_connector();
 
     //start vending terminal until q pressed
     std::cout << "||||||||||||[START BEYLESS VENDING TERMINAL]||||||||||||" << std::endl;
