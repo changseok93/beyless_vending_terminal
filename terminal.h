@@ -13,6 +13,7 @@
 #include <chrono>
 #include "mqtt/async_client.h"
 #include "mqtt/topic.h"
+#include <regex>
 
 #include "camera.h"
 #include "doorLock.h"
@@ -20,14 +21,17 @@
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include <curl/curl.h>
-#include </usr/include/mysql/mysql.h>
+//#include </usr/include/mysql/mysql.h>
+#include <mysql/mysql.h>
 
 #define DAEMON_PROCESS_TERMINAL_H
 
 class terminal : public camera, public doorLock
 {
 private:
-    // mqtt broker address with port number
+    terminal(const terminal &terminal, mqtt::topic pub1, mqtt::topic sub2, mqtt::topic sub1);
+
+// mqtt broker address with port number
     const std::string SERVER_ADDRESS;
     // mqtt client optional parameter
     const bool NO_LOCAL = true;
@@ -60,10 +64,13 @@ private:
     char *password = "return123";
     char *database = "test";
 
+    std::string event = "NONE";
+    std::string event_payload = "NONE";
+
 
 public:
     // terminal class initiaizer, also initialize all inherited classes.
-    terminal(std::string _SERVER_ADDRESS, int _QOS, std::string _user_id, std::string _topic, int* camera_index, int num, int lock, int door, int trigger);
+    terminal(std::string _SERVER_ADDRESS, int _QOS, std::string _user_id, std::string _topic, int lock, int door, int trigger);
     // initialize MQTT client, all publisher & subscriber
     void initialize_mqtt_client();
     //initialize MYSQL database
@@ -83,6 +90,9 @@ public:
 
     // upload image to database
     int64_t database_upload(cv::Mat iter, std::string env_id, std::string type);
+
+    void start_daemon();
+    void callback_rpc();
 
 };
 

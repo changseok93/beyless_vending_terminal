@@ -2,14 +2,14 @@
 
 // terminal class initializer which initialize all inherited classes
 terminal::terminal(std::string _SERVER_ADDRESS, int _QOS,
-        std::string _user_id, std::string _topic, int* camera_index,
-        int num, int lock, int door, int trigger):
+        std::string _user_id, std::string _topic, int lock, int door, int trigger):
         SERVER_ADDRESS(_SERVER_ADDRESS),
         cli(SERVER_ADDRESS, "DEVICE_"+_user_id),
         sub1(cli, _topic, _QOS),
         sub2(cli, "DEVICE_"+_topic, _QOS),
         pub1(cli, "device_operation_vending-web", _QOS),
-        camera(camera_index, num),
+        camera("auto_detect", "/dev/v4l/by-path/", "platform-fe3c0000.usb-usb-0:1.(\\d):1.0-video-index0"),
+//        camera(camera_index, num),
         doorLock(lock, door, trigger)
 {
     this->QOS = _QOS;
@@ -30,7 +30,7 @@ bool terminal::post_image(std::string json) {
     curl = curl_easy_init();
     if(curl) {
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_easy_setopt(curl, CURLOPT_URL, "http://192.168.10.19:8082/det_conn/grab/upload_images");
+        curl_easy_setopt(curl, CURLOPT_URL, "http://192.168.10.19:8082/det_conn/supply/upload_images");
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
         struct curl_slist *headers = NULL;
@@ -40,9 +40,13 @@ bool terminal::post_image(std::string json) {
         curl_mime *mime;
         curl_mimepart *part;
         mime = curl_mime_init(curl);
-        part = curl_mime_addpart(mime);
-        curl_mime_name(part, "0.jpg");
-        curl_mime_filedata(part,"/home/changseok/Desktop/image0.jpeg");
+
+        for (int i = 0; i < get_image_count(); i++){
+            part = curl_mime_addpart(mime);
+            curl_mime_name(part, (std::to_string(i) + std::string(".jpg")).c_str());
+            curl_mime_filedata(part,(std::string("/home/changseok/Desktop/image") + std::to_string(i) + std::string(".jpeg")).c_str());
+        }
+
         part = curl_mime_addpart(mime);
         curl_mime_name(part, "device_id");
         curl_mime_data(part, std::to_string(d["device_id"].GetInt64()).c_str(), CURL_ZERO_TERMINATED);
@@ -51,7 +55,7 @@ bool terminal::post_image(std::string json) {
         curl_mime_data(part, std::to_string(d["operation_log_id"].GetInt()).c_str(), CURL_ZERO_TERMINATED);
         part = curl_mime_addpart(mime);
         curl_mime_name(part, "stage");
-        curl_mime_data(part, "open_door", CURL_ZERO_TERMINATED);
+        curl_mime_data(part, d["type"].GetString(), CURL_ZERO_TERMINATED);
         part = curl_mime_addpart(mime);
         curl_mime_name(part, "user_id");
         curl_mime_data(part, std::to_string(d["user_id"].GetInt()).c_str(), CURL_ZERO_TERMINATED);
@@ -74,11 +78,11 @@ void terminal::initialize_mqtt_client() {
     connOpts.set_keep_alive_interval(1200);
     connOpts.set_mqtt_version(MQTTVERSION_5);
     connOpts.set_clean_start(true);
-    connOpts.set_user_name("DEVICE_"+this->user_id);
-    connOpts.set_password("DEVICE_"+this->user_id);
+    connOpts.set_user_name("DEVICE_" + this->user_id);
+    connOpts.set_password("DEVICE_" + this->user_id);
 
 
-    cli.set_connection_lost_handler([this](const std::string&) {
+    cli.set_connection_lost_handler([this](const std::string &) {
         log.print_log("connection lost");
         exit(2);
     });
@@ -91,7 +95,7 @@ void terminal::initialize_mqtt_client() {
         pub1.subscribe(subOpts)->wait();
         log.print_log("publisher connected");
 
-    } catch(const mqtt::exception& exc){
+    } catch (const mqtt::exception &exc) {
         std::cerr << exc.what() << std::endl;
     }
 
@@ -104,78 +108,13 @@ void terminal::initialize_mqtt_client() {
 
             std::string msg_group_type = d["msg_group_type"].GetString();
             std::string type = d["type"].GetString();
+            if (msg_group_type == "cmd") {
+                event = type;
+                event_payload = json;
 
-            if (msg_group_type == "cmd"){
-                if (type == "grap_image"){
-                    grab_frame();
-                    save_frame("/home/changseok/Desktop/");
-                    post_image(json);
-                }
-                else if (type == "collect_dataset"){
-                    std::string res_form;
-                    int64_t image_id;
-                    if (is_ready()){
-                        door_open();
-                        wait_open();
-                        wait_close();
-                        door_close();
-                        grab_frame();
-                        std::vector<cv::Mat> images = get_frame();
-                        std::vector<cv::Mat>::iterator iter;
-
-                        for(iter = images.begin(); iter != images.end(); iter++){
-                            image_id = database_upload(*iter, d["env_id"].GetString(), d["image_type"].GetString());
-                        }
-                        res_form = create_response_form(json, "ack", "", std::to_string(image_id), true);
-                        mqtt_publish(res_form);
-                    } else {
-                        res_form = create_response_form(json, "ack", "", "", false);
-                        mqtt_publish(res_form);
-                    }
-                }
-                else if (type == "open_door"){
-                    if (is_ready()){
-                        std::string res_form;
-                        grab_frame();
-                        save_frame("/home/changseok/Desktop/");
-                        if(post_image(json))
-                            res_form = create_response_form(json, "image_upload", "open_door", "image_upload",true);
-                        else
-                            res_form = create_response_form(json, "image_upload", "open_door", "image_upload",false);
-                        mqtt_publish(res_form);
-
-                        if (door_open())
-                            res_form = create_response_form(json, "door_open_close", "open_door", "open_door",true);
-                        else
-                            res_form = create_response_form(json, "door_open_close", "open_door", "open_door",false);
-                        mqtt_publish(res_form);
-
-                        wait_open();
-                        wait_close();
-
-                        if (door_close())
-                            res_form = create_response_form(json, "door_open_close", "close_door", "close_door",true);
-                        else
-                            res_form = create_response_form(json, "door_open_close", "close_door", "close_door",false);
-                        mqtt_publish(res_form);
-
-                        grab_frame();
-                        save_frame("/home/changseok/Desktop/");
-                        if(post_image(json))
-                            res_form = create_response_form(json, "image_upload", "open_door", "image_upload",true);
-                        else
-                            res_form = create_response_form(json, "image_upload", "open_door", "image_upload",false);
-                        mqtt_publish(res_form);
-                    }
-                }
-
-                if (type == "exit"){
-                    return ;
-                }
             }
         }
     });
-
 
     try {
         auto subOpts = mqtt::subscribe_options(NO_LOCAL);
@@ -184,7 +123,7 @@ void terminal::initialize_mqtt_client() {
         sub2.subscribe(subOpts)->wait();
         log.print_log("subscriber connected");
 
-    } catch(const mqtt::exception& exc){
+    } catch (const mqtt::exception &exc) {
         std::cerr << exc.what() << std::endl;
     }
 }
@@ -300,7 +239,7 @@ int64_t terminal::database_upload(cv::Mat iter, std::string env_id, std::string 
     std::vector<uchar> buff;
     std::vector<int> param = std::vector<int>(2);
     param[0]=cv::IMWRITE_JPEG_QUALITY;
-    param[1]=95;
+    param[1]=100;
 
     //jpeg compression
     imencode(".jpg",iter,buff,param);
@@ -339,4 +278,89 @@ int64_t terminal::database_upload(cv::Mat iter, std::string env_id, std::string 
 //    delete data;
     // -----------------------------------------------------------------------------------------------
     return mysql_insert_id(conn);
+}
+
+void terminal::start_daemon() {
+    std::thread t0(&terminal::callback_rpc, this);
+    t0.detach();
+}
+
+void terminal::callback_rpc() {
+    while(true){
+        usleep(5000);
+        if (event == "open_door") {
+            if (is_ready()) {
+                std::string res_form;
+                grab_frame();
+                save_frame("/home/changseok/Desktop/");
+                if (post_image(event_payload))
+                    res_form = create_response_form(event_payload, "image_upload", "open_door", "image_upload", true);
+                else
+                    res_form = create_response_form(event_payload, "image_upload", "open_door", "image_upload", false);
+                mqtt_publish(res_form);
+
+                if (door_open())
+                    res_form = create_response_form(event_payload, "door_open_close", "open_door", "open_door", true);
+                else
+                    res_form = create_response_form(event_payload, "door_open_close", "open_door", "open_door", false);
+                mqtt_publish(res_form);
+
+                wait_open();
+                wait_close();
+
+                if (door_close())
+                    res_form = create_response_form(event_payload, "door_open_close", "close_door", "close_door", true);
+                else
+                    res_form = create_response_form(event_payload, "door_open_close", "close_door", "close_door",
+                                                    false);
+                mqtt_publish(res_form);
+
+                grab_frame();
+                save_frame("/home/changseok/Desktop/");
+
+                std::regex re("\"type\":\"open_door\"");
+                event_payload = std::regex_replace(event_payload, re, "\"type\":\"close_door\"");
+
+                if (post_image(event_payload))
+                    res_form = create_response_form(event_payload, "image_upload", "open_door", "image_upload", true);
+                else
+                    res_form = create_response_form(event_payload, "image_upload", "open_door", "image_upload", false);
+                mqtt_publish(res_form);
+            }
+            event = "NONE";
+            event_payload = "NONE";
+        } else if (event == "collect_dataset") {
+            rapidjson::Document d;
+            d.Parse(event_payload.c_str());
+
+            std::string res_form;
+            int64_t image_id;
+            if (is_ready()){
+                door_open();
+                wait_open();
+                wait_close();
+                door_close();
+                grab_frame();
+                std::vector<cv::Mat> images = get_frame();
+                std::vector<cv::Mat>::iterator iter;
+
+                for(iter = images.begin(); iter != images.end(); iter++){
+                    image_id = database_upload(*iter, d["env_id"].GetString(), d["image_type"].GetString());
+                }
+                res_form = create_response_form(event_payload, "ack", "", std::to_string(image_id), true);
+                mqtt_publish(res_form);
+            } else {
+                res_form = create_response_form(event_payload, "ack", "", "", false);
+                mqtt_publish(res_form);
+            }
+            event = "NONE";
+            event_payload = "NONE";
+        } else if (event == "grap_image") {
+            grab_frame();
+            save_frame("/home/changseok/Desktop/");
+            post_image(event_payload);
+        } else if (event == "terminate") {
+            break;
+        }
+    }
 }

@@ -10,9 +10,47 @@ camera::camera(){
     video_device.push_back(0);
 
     cv::VideoCapture _cap;
-    _cap.open("/dev/video0");
+    _cap.open("/dev/video0", CV_CAP_V4L);
 
     caps.push_back(_cap);
+}
+
+camera::camera(std::string mode, char* prefix_path, std::string regex_grammer) {
+
+    char* string_buffer;
+    // if mode is not in auto detect, call default initializer
+    std::cout << mode  << std::endl;
+    if (mode != "auto_detect"){
+        //default Video_device is 0
+        video_device.push_back(0);
+
+        cv::VideoCapture _cap;
+        _cap.open("/dev/video0", CV_CAP_V4L);
+
+
+        caps.push_back(_cap);
+    }
+    else {
+        std::regex re (regex_grammer.c_str());
+        std::smatch match;
+
+        for (auto & entry : std::experimental::filesystem::directory_iterator(prefix_path)){
+            std::string str = entry.path().string();
+            if (std::regex_search(str, match, re, std::regex_constants::match_default)){
+                string_buffer = new char[50];
+                sprintf(string_buffer, "camera device found on port number : %s", match[1].str().c_str());
+                log.print_log(string_buffer);
+                delete string_buffer;
+
+                video_device.push_back(std::stoi(match[1].str()));
+                cv::VideoCapture _cap(prefix_path + match.str(), CV_CAP_V4L);
+//                _cap.open(());
+
+                caps.push_back(_cap);
+
+            }
+        }
+    }
 }
 
 // camera class initializer, gets number of camera devices and list of video indexs
@@ -77,6 +115,12 @@ bool camera::save_frame(char* _PATH){
             return false;
         }
     }
-    log.print_log("SAVE IMAGE TO " + std::string(PATH));
+    log.print_log("SAVE IMAGE TO " + std::string(_PATH));
     return true;
+}
+
+int camera::get_image_count() {
+
+    return video_device.size();
+
 }
