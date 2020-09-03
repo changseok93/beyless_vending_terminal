@@ -305,8 +305,11 @@ void terminal::callback_rpc() {
                     res_form = create_response_form(event_payload, "door_open_close", "open_door", "open_door", false);
                 mqtt_publish(res_form);
 
-                wait_open();
-                wait_close();
+                if (wait_open())
+                    wait_close();
+                else {
+                    log.print_log("");
+                }
 
                 if (door_close())
                     res_form = create_response_form(event_payload, "door_open_close", "close_door", "close_door", true);

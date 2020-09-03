@@ -144,15 +144,19 @@ void doorLock::reset_pins(){
 
 // refresh all pin states and save it
 void doorLock::get_states(){
-    this->door >> this->door_value;
-    this->lock >> this->lock_value;
-    this->trigger >> this->trigger_value;
+    try{
+        this->door >> this->door_value;
+        this->lock >> this->lock_value;
+        this->trigger >> this->trigger_value;
 
-    this->door.seekg(0);
-    this->lock.seekg(0);
-    this->trigger.seekg(0);
+        this->door.seekg(0);
+        this->lock.seekg(0);
+        this->trigger.seekg(0);
 
-    this->status = lock_status(4*this->lock_value + 2*this->door_value + this->trigger_value);
+        this->status = lock_status(4*this->lock_value + 2*this->door_value + this->trigger_value);
+    } catch (int e) {
+        log.print_log("DoorLock get state Error!");
+    }
 
     return ;
 }
