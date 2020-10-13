@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="default (bbc105fe-896f-4fd2-9b52-9014673fb2c6)" showNewOnSourceInSync="false">
+    <serverData>
+      <paths name="default (bbc105fe-896f-4fd2-9b52-9014673fb2c6)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/tmp.DKyhPZMIc8" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

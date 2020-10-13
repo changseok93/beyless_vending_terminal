@@ -76,11 +76,11 @@ bool terminal::post_image(std::string json) {
 // initialize MQTT client service, register call back function with lambda function (will be modified soon)
 void terminal::initialize_mqtt_client() {
     connOpts.set_keep_alive_interval(1200);
-    connOpts.set_mqtt_version(MQTTVERSION_5);
-    connOpts.set_clean_start(true);
-    connOpts.set_user_name("DEVICE_" + this->user_id);
-    connOpts.set_password("DEVICE_" + this->user_id);
-
+//    connOpts.set_mqtt_version(MQTTVERSION_5);
+    connOpts.set_clean_session(false);
+//    connOpts.set_clean_start(true);
+    connOpts.set_user_name("beyless");
+    connOpts.set_password("ws-beyless");
 
     cli.set_connection_lost_handler([this](const std::string &) {
         log.print_log("connection lost");

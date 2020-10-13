@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="daemon_process"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\usr\;CMake Files\..\..\usr\local\;CMake Files\..\..\usr\local\share\;CMake Files\..\..\usr\local\share\OpenCV\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="daemon_process">
+				<Option output="/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/daemon_process" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DOPENSSL"/>
+					<Add directory="/usr/local/include/opencv"/>
+					<Add directory="/usr/include/c++/5"/>
+					<Add directory="/usr/include/aarch64-linux-gnu/c++/5"/>
+					<Add directory="/usr/include/c++/5/backward"/>
+					<Add directory="/usr/lib/gcc/aarch64-linux-gnu/5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/aarch64-linux-gnu/5/include-fixed"/>
+					<Add directory="/usr/include/aarch64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 daemon_process"/>
+					<CompileFile command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="daemon_process/fast">
+				<Option output="/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/daemon_process" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DOPENSSL"/>
+					<Add directory="/usr/local/include/opencv"/>
+					<Add directory="/usr/include/c++/5"/>
+					<Add directory="/usr/include/aarch64-linux-gnu/c++/5"/>
+					<Add directory="/usr/include/c++/5/backward"/>
+					<Add directory="/usr/lib/gcc/aarch64-linux-gnu/5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/aarch64-linux-gnu/5/include-fixed"/>
+					<Add directory="/usr/include/aarch64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 daemon_process/fast"/>
+					<CompileFile command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j6 -f &quot;/tmp/tmp.DKyhPZMIc8/cmake-build-debug-default/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/camera.cpp">
+			<Option target="daemon_process"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/camera.h">
+			<Option target="daemon_process"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/doorLock.cpp">
+			<Option target="daemon_process"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/doorLock.h">
+			<Option target="daemon_process"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/logger.cpp">
+			<Option target="daemon_process"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/logger.h">
+			<Option target="daemon_process"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/main.cpp">
+			<Option target="daemon_process"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/terminal.cpp">
+			<Option target="daemon_process"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/terminal.h">
+			<Option target="daemon_process"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/../../usr/local/share/OpenCV/OpenCVConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\usr\local\share\OpenCV\"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/../../usr/local/share/OpenCV/OpenCVConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\usr\local\share\OpenCV\"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/../../usr/local/share/OpenCV/OpenCVModules-release.cmake">
+			<Option virtualFolder="CMake Files\..\..\usr\local\share\OpenCV\"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.DKyhPZMIc8/../../usr/local/share/OpenCV/OpenCVModules.cmake">
+			<Option virtualFolder="CMake Files\..\..\usr\local\share\OpenCV\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
