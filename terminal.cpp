@@ -7,7 +7,7 @@ terminal::terminal(std::string _SERVER_ADDRESS, int _QOS,
         cli(SERVER_ADDRESS, "DEVICE_"+_user_id),
         sub1(cli, _topic, _QOS),
         sub2(cli, "DEVICE_"+_topic, _QOS),
-        pub1(cli, "device_operation_vending-web", _QOS),
+        pub1(cli, "device_operation", _QOS),
         camera("auto_detect", "/dev/v4l/by-path/", "platform-fe3c0000.usb-usb-0:1.(\\d):1.0-video-index0"),
 //        camera(camera_index, num),
         doorLock(lock, door, trigger)
@@ -31,7 +31,15 @@ bool terminal::post_image(std::string json) {
 
     if(curl) {
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_easy_setopt(curl, CURLOPT_URL, "http://ai0.beyless.com:8080/detection/grab/upload-images");
+        if (std::string(d["type"].GetString()) == "grab_image"){
+            log.print_log("http upload grab");
+            curl_easy_setopt(curl, CURLOPT_URL, "http://ai0.beyless.com:8080/detection/grab/upload-images");
+        } else if (std::string(d["type"].GetString()) == "open_door" || std::string(d["type"].GetString()) == "close_door"){
+            log.print_log("http upload purchase");
+            curl_easy_setopt(curl, CURLOPT_URL, "http://ai0.beyless.com:8080/detection/upload-images");
+        } else {
+            log.print_log(d["type"].GetString());
+        }
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 //        curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
         struct curl_slist *headers = NULL;
@@ -186,18 +194,16 @@ std::string terminal::create_response_form(std::string json, char* type, std::st
 
     std::vector<std::string> json_members;
     if (type == "image_upload"){
-        json_members.assign({"msg", "app_type", "device_id", "msg_group_type",
-                             "type", "upload_duration","operation_log_id",
-                             "stage", "user_id", "msg_id", "ret_code",
-                             "server_node_id", "timestamp"});
+        json_members.assign({"msg_id", "token", "operation_log_id", "type",
+                             "stage", "msg", "ret_code",
+                             "upload_duration", "timestamp"});
     }
     else if (type == "door_open_close"){
-        json_members.assign({"msg", "operation_log_id", "app_type", "device_id",
-                             "user_id", "msg_group_type", "type", "msg_id",
-                             "ret_code", "server_node_id", "timestamp"});
+        json_members.assign({"msg_id", "operation_log_id", "type",
+                             "token", "msg", "ret_code", "timestamp"});
     }
     else if (type == "ack"){
-        json_members.assign({"msg", "msg_group_type", "type", "ret_code"});
+        json_members.assign({"msg", "ret_code"});
     }
     else
         return NULL;
@@ -223,16 +229,15 @@ std::string terminal::create_response_form(std::string json, char* type, std::st
                         return_form.AddMember("ret_code", "0000", allocator);
                     else
                         return_form.AddMember("ret_code", "0001", allocator);
+            } else {
+                log.print_log("can't find return type handler ... abort");
             }
         }
     }
-
     if (msg == "open_door"){
-        return_form["msg_group_type"] = "ack";
         return_form["type"] = "open_door_resp";
     } else if (msg == "close_door") {
-        return_form["msg_group_type"] = "notify";
-        return_form["type"] = "close_door";
+        return_form["type"] = "close_door_resp";
     }
 
     rapidjson::StringBuffer buffer;
