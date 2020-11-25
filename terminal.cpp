@@ -28,11 +28,12 @@ bool terminal::post_image(std::string json) {
     CURL *curl;
     CURLcode res;
     curl = curl_easy_init();
+
     if(curl) {
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_easy_setopt(curl, CURLOPT_URL, "http://192.168.10.19:8082/det_conn/supply/upload_images");
+        curl_easy_setopt(curl, CURLOPT_URL, "http://ai0.beyless.com:8080/detection/grab/upload-images");
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
+//        curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
         struct curl_slist *headers = NULL;
         headers = curl_slist_append(headers, "Content-Type: multipart/form-data");
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -40,37 +41,50 @@ bool terminal::post_image(std::string json) {
         curl_mime *mime;
         curl_mimepart *part;
         mime = curl_mime_init(curl);
-
         for (int i = 0; i < get_image_count(); i++){
             part = curl_mime_addpart(mime);
             curl_mime_name(part, (std::to_string(i) + std::string(".jpg")).c_str());
             curl_mime_filedata(part,(std::string("/home/changseok/Desktop/image") + std::to_string(i) + std::string(".jpeg")).c_str());
         }
 
-        part = curl_mime_addpart(mime);
-        curl_mime_name(part, "device_id");
-        curl_mime_data(part, std::to_string(d["device_id"].GetInt64()).c_str(), CURL_ZERO_TERMINATED);
-        part = curl_mime_addpart(mime);
-        curl_mime_name(part, "operation_log_id");
-        curl_mime_data(part, std::to_string(d["operation_log_id"].GetInt()).c_str(), CURL_ZERO_TERMINATED);
-        part = curl_mime_addpart(mime);
-        curl_mime_name(part, "stage");
-        curl_mime_data(part, d["type"].GetString(), CURL_ZERO_TERMINATED);
-        part = curl_mime_addpart(mime);
-        curl_mime_name(part, "user_id");
-        curl_mime_data(part, std::to_string(d["user_id"].GetInt()).c_str(), CURL_ZERO_TERMINATED);
-        part = curl_mime_addpart(mime);
-        curl_mime_name(part, "server_node_id");
-        curl_mime_data(part, d["server_node_id"].GetString(), CURL_ZERO_TERMINATED);
+        if (d.HasMember("device_id")){
+            part = curl_mime_addpart(mime);
+            curl_mime_name(part, "device_id");
+            curl_mime_data(part, std::to_string(d["device_id"].GetInt64()).c_str(), CURL_ZERO_TERMINATED);
+        }
+        if (d.HasMember("type")){
+            part = curl_mime_addpart(mime);
+            curl_mime_name(part, "stage");
+            curl_mime_data(part, d["type"].GetString(), CURL_ZERO_TERMINATED);
+        }
+        if (d.HasMember("token")){
+            part = curl_mime_addpart(mime);
+            curl_mime_name(part, "token");
+            curl_mime_data(part, d["token"].GetString(), CURL_ZERO_TERMINATED);
+        }
+        if (d.HasMember("operation_log_id")){
+            part = curl_mime_addpart(mime);
+            curl_mime_name(part, "operation_log_id");
+            curl_mime_data(part, std::to_string(d["operation_log_id"].GetInt64()).c_str(), CURL_ZERO_TERMINATED);
+        } else {
+            part = curl_mime_addpart(mime);
+            curl_mime_name(part, "operation_log_id");
+            curl_mime_data(part, std::to_string(d["request_id"].GetInt64()).c_str(), CURL_ZERO_TERMINATED);
+        }
+
         curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
         res = curl_easy_perform(curl);
         curl_mime_free(mime);
     }
     curl_easy_cleanup(curl);
-    if (res == CURLE_OK)
+    if (res == CURLE_OK){
+        log.print_log("HTTP POST SUCCESS");
         return true;
-    else
+    } else{
+        log.print_log("HTTP POST FAIL");
         return false;
+    }
+
 }
 
 // initialize MQTT client service, register call back function with lambda function (will be modified soon)
@@ -106,13 +120,10 @@ void terminal::initialize_mqtt_client() {
             rapidjson::Document d;
             d.Parse(json.c_str());
 
-            std::string msg_group_type = d["msg_group_type"].GetString();
+//            std::string msg_group_type = d["msg_group_type"].GetString();
             std::string type = d["type"].GetString();
-            if (msg_group_type == "cmd") {
-                event = type;
-                event_payload = json;
-
-            }
+            event = type;
+            event_payload = json;
         }
     });
 
@@ -358,10 +369,12 @@ void terminal::callback_rpc() {
             }
             event = "NONE";
             event_payload = "NONE";
-        } else if (event == "grap_image") {
+        } else if (event == "grab_image") {
             grab_frame();
             save_frame("/home/changseok/Desktop/");
             post_image(event_payload);
+            event = "NONE";
+            event_payload = "NONE";
         } else if (event == "terminate") {
             break;
         }
