@@ -203,7 +203,7 @@ std::string terminal::create_response_form(std::string json, char* type, std::st
                              "token", "msg", "ret_code", "timestamp"});
     }
     else if (type == "ack"){
-        json_members.assign({"msg", "ret_code"});
+        json_members.assign({"msg", "ret_code", "env_id"});
     }
     else
         return NULL;
