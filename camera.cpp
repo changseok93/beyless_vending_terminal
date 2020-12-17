@@ -43,10 +43,9 @@ camera::camera(std::string mode, char* prefix_path, std::string regex_grammer) {
                 delete string_buffer;
 
                 video_device.push_back(std::stoi(match[1].str()));
-                cv::VideoCapture _cap(prefix_path + match.str(), CV_CAP_V4L);
+                //cv::VideoCapture _cap(prefix_path + match.str(), CV_CAP_V4L);
 //                _cap.open(());
-
-                caps.push_back(_cap);
+                caps.emplace_back(cv::VideoCapture(prefix_path + match.str(), CV_CAP_V4L));
 
             }
         }
@@ -77,11 +76,12 @@ bool camera::grab_frame() {
             iter->set(CV_CAP_PROP_FRAME_HEIGHT, 1080);
 
             // for stable output quality, get 5 frames and use last one
+            cv::Mat img;
             for(int i = 0; i<5; i++)
-                *iter >> image;
-            cv::Rect bounds(0,0,image.cols,image.rows);
+                *iter >> img;
+            cv::Rect bounds(0,0,img.cols,img.rows);
             cv::Rect r(330,0,1290,1080); // partly outside
-            cv::Mat roi = image( r & bounds ); // cropped to fit image
+            cv::Mat roi = img( r & bounds ); // cropped to fit image
 
             images.push_back(roi);
             roi.release();

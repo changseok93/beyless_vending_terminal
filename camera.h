@@ -22,7 +22,6 @@ private:
     std::vector <cv::VideoCapture> caps; // list of activated video capture devices
     std::vector <int> video_device; //list of video capture device index
     std::vector <cv::Mat> images; // list of latest images from camera
-    cv::Mat image; // temper single image
 
     logger log = logger("CAMERA"); //logger object for print log
 public:
